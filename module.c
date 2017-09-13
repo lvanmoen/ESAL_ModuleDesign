@@ -13,6 +13,9 @@
 //descriptions************
 
 //group1
+//group1
+//SetupPins() initialize pin to output, store port and pin number in a private global variable named WSPort and WSPin
+//.SendOne() send a logical '1' as described in timing diagram. Use the private global variable to determine port and location.
 
 //group2
 
