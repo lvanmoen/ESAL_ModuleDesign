@@ -123,7 +123,7 @@ Set_Pins(uint8_t WSPin, uint8_t WSPort)
 	GPIOPinTypeGPIOOutput(WSPort, WSPin);  //Set pins as outputs
 }
 
-SendLatch(uint8_t WSPin, uint8_t WSPort)
+SendLatch()
 {
 	GPIOPinWrite(WSPort, WSPin, 0xFF) //set pin low
 	uint16_t i;
