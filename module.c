@@ -13,6 +13,9 @@
 //descriptions************
 
 //group1
+//group1
+//SetupPins() initialize pin to output, store port and pin number in a private global variable named WSPort and WSPin
+//.SendOne() send a logical '1' as described in timing diagram. Use the private global variable to determine port and location.
 
 //group2
 // 9/13/17
@@ -52,6 +55,7 @@
 													//ring has 60 leds*
 //group1
 
+
 //group2
 
 #include "project.h"
@@ -89,13 +93,14 @@
 
 //group1
 
-
+private int WSPort;  //Port for LEDs
+private int WSPin;	//Pin for LEDs
 
 //group2
 // Define and set global variables
-// ì\0î defines a string
-char ProgramPort[]=îGPIO_PORTF_BASE\0î;
-char ProgramPin[]=îGPIO_PIN_3\0î;
+// ‚Äú\0‚Äù defines a string
+char ProgramPort[]=‚ÄùGPIO_PORTF_BASE\0‚Äù;
+char ProgramPin[]=‚ÄùGPIO_PIN_3\0‚Äù;
 
 //group3
 
@@ -108,7 +113,10 @@ char ProgramPin[]=îGPIO_PIN_3\0î;
 //private prototypes ************
 
 //group1
-
+void SetupPins(int WSPort, int WSPin); //Function that inititalizes pin to output, store ports and pin number in a variable.
+void SendOne(void);  //Sends a logical '1' in a certain time interval
+void SysTickWait(unsigned long delay)  //Time delay Function
+	
 //group2
 //create and define functions
 // switch case would be complicated
@@ -131,7 +139,7 @@ Void SetupPins(char portIN, int pinIN)
 }
 Void SendZero()
 	{
-		// ì\0î defines a string
+		// ‚Äú\0‚Äù defines a string
 // use the global variables that are uptodate
 		GPIOPinWrite(ProgramPort, ProgramPin, 0x0);
 	}
@@ -157,6 +165,51 @@ UartSetup();
 
 //group1
 
+
+SetupPins(int WSPort, int WSPin)
+{
+	GPIOPinTypeGPIOOutput(WSPort, WSPin); // set pin 'WSPin' to output on port 'WSPort'
+}
+
+SendOne(void)
+{
+	// 80 MHz core clock (12.5 ns or 0.0125 us)
+	//Using Data sheet T1H must be '1' for 0.7us, then '0' for 0.6 us. 
+	NVIC_ST_CTRL_R = 0; // disable SysTick during setup
+	NVIC_ST_RELOAD_R = NVIC_ST_RELOAD_M; // maximum reload value
+	NVIC_ST_CURRENT_R = 0; // any write to current clears it	 
+	NVIC_ST_CTRL_R = NVIC_ST_CTRL_ENABLE + NVIC_ST_CTRL_CLK_SRC; // enable SysTick with core clock
+
+	unsigned long i;  //Long used for timer
+
+	
+	GPIOPinWrite(WSPort, WSPin, 0x1); //Sends a logical '1' to WSPin
+	for (i = 0; i<delay; i++)		
+	{
+		SysTickWait(56); // wait 0.7us    56 Cycles * 0.0125 us =  0.7 us
+	}
+
+	GPIOPinWrite(WSPort, WSPin, 0x0); //Sends a logical '0' to WSPin
+	for (i = 0; i<delay; i++)
+	{
+		SysTickWait(48); // wait 0.7us    48 Cycles * 0.0125 us =  0.6 us
+	}
+
+}
+
+//Time delay using busy wait.
+// The delay parameter is in units of the 80 MHz core clock. (12.5 ns)
+void SysTickWait(unsigned long delay)
+{
+	NVIC_ST_RELOAD_R = delay - 1; // number of counts to wait
+	NVIC_ST_CURRENT_R = 0; // any value written to CURRENT clears
+	while ((NVIC_ST_CTRL_R & 0x00010000) == 0)
+	{
+		// wait for count flag
+	}
+}
+
+
 //group2
 
 Void main()
@@ -166,20 +219,20 @@ Void main()
 SetupHardware();// set up hardware function  
 
 	//request and set port
-	printf(ìPlease enter desired port:\nî);
-	scanf(ì%sî, &ProgramPort);
+	printf(‚ÄúPlease enter desired port:\n‚Äù);
+	scanf(‚Äú%s‚Äù, &ProgramPort);
 
 	// request and set pin
-	printf(ì\n Please enter desired pin:\nî);
-	scanf(ì%dî, &ProgramPin);
+	printf(‚Äú\n Please enter desired pin:\n‚Äù);
+	scanf(‚Äú%d‚Äù, &ProgramPin);
 
 	//Now that global variables are set, pass them to SetupPins()
 	SetupPins(ProgramPort, ProgramPin);
 
 	//Pins are set up
 	// request if pins should be turned off
-	printf(ìWould you like to turn the pin off? 1=Yes, Anything else=Noî);
-	scanf(ì%dî, &request);
+	printf(‚ÄúWould you like to turn the pin off? 1=Yes, Anything else=No‚Äù);
+	scanf(‚Äú%d‚Äù, &request);
 	
 	if(request==1)
 	{
