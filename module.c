@@ -84,6 +84,9 @@
 //group3
 
 //group4
+static uint8_t  WSport;
+static uint8_t WSPin;
+
 
 //group5
 
@@ -112,6 +115,25 @@
 //group3
 
 //group4
+
+Set_Pins(uint8_t WSPin, uint8_t WSPort)
+{
+	SysCtlPeripheralEnable(SYSCTL_PERIPH_WSport);// Enable the GPIO port that is used for the on-board
+	SetupHardware();
+	GPIOPinTypeGPIOOutput(WSPort, WSPin);  //Set pins as outputs
+}
+
+SendLatch(uint8_t WSPin, uint8_t WSPort)
+{
+	GPIOPinWrite(WSPort, WSPin, 0xFF) //set pin low
+	uint16_t i;
+	
+	for (i = 0; i < 2000; i++)
+	{
+		__nop(); 
+	}
+
+}
 
 //group5
 
