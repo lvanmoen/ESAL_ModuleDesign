@@ -170,21 +170,21 @@ void SendLatch(void)
 	
 	// Configure and enable the SysTick counter.
 			
-			// Need to be 50us.  12.5ns * NumTicks = 50us
-			SysTickPeriodSet(4000);
+	// Need to be 50us.  12.5ns * NumTicks = 50us
+	SysTickPeriodSet(4000);
 	
-	 		// Force the SysTick counter to reload immediately.  
-			// Any write to this register
-			// clears the SysTick counter to 0 and
-			// causes a reload with the ui32Period supplied here on the
-			// next clock after SysTick is enabled.
-	 		NVIC_ST_CURRENT = 0; 
+	// Force the SysTick counter to reload immediately.  
+	// Any write to this register
+	// clears the SysTick counter to 0 and
+	// causes a reload with the ui32Period supplied here on the
+	// next clock after SysTick is enabled.
+	NVIC_ST_CURRENT = 0; 
 	
-	  //Set output LOW
-	  // We assume that the output is high already
-			GPIOPinWrite(base, pinBit, 0x0);
+	//Set output LOW
+	// We assume that the output is high already
+	GPIOPinWrite(base, pinBit, 0x0);
 		
-			SysTickEnable();
+	SysTickEnable();
 	
 }
 
