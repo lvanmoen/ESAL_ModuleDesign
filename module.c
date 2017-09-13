@@ -186,10 +186,6 @@ void SendLatch(void)
 		
 			SysTickEnable();
 	
-		// 	Delay for 50us...
-		// 	Set Output HIGH
-			GPIOPinWrite(base, pinBit, 0x1);
-	
 }
 
 
