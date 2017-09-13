@@ -18,68 +18,6 @@
 
 //group3
 
-// Static glboal variables for port and pin
-static uint8_t WSPort;
-static uint8_t WSPin;
-
-// Use an enum for port names to make it more friendly to the service layer.
-typedef enum {PORTA, PORTB, PORTC, PORTD, PORTE, PORTF} Port_t;
-	
-// Take 
-void SetupPins(Port_t port, uint8_t pin)
-{
-	uint32_t base;
-	uint8_t pinFlag;
-	
-	// Save parameters to private globals.
-	WSPort = portNumber;
-	WSPin = pin;
-	
-	// Translate the service layer port name to a HAL port base address.
-	switch (port) {
-		case PORTA:
-			base = GPIO_PORTA_BASE;
-			break;
-		case PORTB:
-			base = GPIO_PORTB_BASE;
-			break;
-		case PORTC:
-			base = GPIO_PORTC_BASE;
-			break;
-		case PORTD:
-			base = GPIO_PORTD_BASE;
-			break;
-		case PORTE:
-			base = GPIO_PORTE_BASE;
-			break;
-		case PORTF:
-			base = GPIO_PORTF_BASE;
-			break;
-	
-		default:
-		
-	}
-	
-	// Shift 0x1 over by the pin number to get proper pin flag.
-	pinFlag = 0x1 << pin;
-	
-	// Call the Tiva library to configure the pin for output.
-	GPIOPinTypeGPIOOutput(base, pinFlag)
-	
-}
-
-void SendLatch(void)
-{
-	
-	
-	
-}
-
-
-
-
-
-
 //group4
 
 //group5
@@ -114,6 +52,17 @@ void SendLatch(void)
 //group2
 
 //group3
+#include <gpio.h>
+
+//
+// Helper Macros
+//
+
+// Creates the pin mask bit from a pin number.
+#define PinBit(pinNumber)			(0x1 << pinNumber)
+
+// Lookup up the port's base address based on its PortName_t value
+#define PortBase(portName)		PortBaseMap[portName]
 
 //group4
 
@@ -138,12 +87,28 @@ void SendLatch(void)
 
 //global variables ************
 
-
 //group1
 
 //group2
 
 //group3
+
+// Private global variables to store port and pin
+static uint8_t WSPort;
+static uint8_t WSPin;
+
+// This array maps a PortName_t value to its corresponding GPIO base address.
+//	See SetupPins() for an example.  Note that this array is marked 'const' and 
+//	should therefore be stored in Flash (ROM).
+static const uint32_t PortBaseMap[] = { 
+	GPIO_PORTA_BASE,
+	GPIO_PORTB_BASE,
+	GPIO_PORTC_BASE,
+	GPIO_PORTD_BASE,
+	GPIO_PORTE_BASE,
+	GPIO_PORTF_BASE
+};
+	
 
 //group4
 
@@ -172,6 +137,62 @@ void SendLatch(void)
 //group2
 
 //group3
+
+// Take a port name and pin number and configure it for digital output.
+void SetupPins(PortName_t port, uint8_t pinNumber)
+{
+	uint32_t base;
+	uint8_t pinBit;
+	
+	// Save port and pin parameters to private globals.
+	WSPort = port;
+	WSPin = pin;
+	
+	// Translate the service layer port name to a HAL port base address.
+	base = PortBase(port);
+	
+	// Get the proper pin bit flag based on the pin number. 
+	pinBit = PinBit(pinNumber);
+	
+	// Call the Tiva library to configure the port/pin for output.
+	GPIOPinTypeGPIOOutput(base, pinBit)
+	
+}
+
+void SendLatch(void)
+{
+	uint32_t base;
+	uint8_t pinBit;
+	
+	base = PortBase(WSPort);
+	
+	pinBit = PinBit(WSPin);
+	
+	// Configure and enable the SysTick counter.
+			
+			// Need to be 50us.  12.5ns * NumTicks = 50us
+			SysTickPeriodSet(4000);
+	
+	 		// Force the SysTick counter to reload immediately.  
+			// Any write to this register
+			// clears the SysTick counter to 0 and
+			// causes a reload with the ui32Period supplied here on the
+			// next clock after SysTick is enabled.
+	 		NVIC_ST_CURRENT = 0; 
+	
+	  //Set output LOW
+	  // We assume that the output is high already
+			GPIOPinWrite(base, pinBit, 0x0);
+		
+			SysTickEnable();
+	
+		// 	Delay for 50us...
+		// 	Set Output HIGH
+			GPIOPinWrite(base, pinBit, 0x1);
+	
+}
+
+
 
 //group4
 
