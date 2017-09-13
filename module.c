@@ -17,6 +17,7 @@
 //group2
 // 9/13/17
 //Given Task: SetupPins() and SendZero()
+//Members: Jay Douglas, Lakeysha Green, Nicholas Hunt, Thomas Weeks
 
 //group3
 
